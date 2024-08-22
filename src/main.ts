@@ -1,5 +1,14 @@
-import { app, BrowserWindow } from 'electron';
+import { app, autoUpdater, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+// import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
+
+// updateElectronApp({
+//   updateSource: {
+//     type: UpdateSourceType.StaticStorage,
+//     baseUrl: 'http://localhost:3000/make/zip'
+//   }
+// });
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -13,6 +22,7 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true
     },
   });
 
@@ -25,6 +35,18 @@ const createWindow = () => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  autoUpdater.setFeedURL({
+    url: 'http://localhost:3000'
+  });
+  autoUpdater.checkForUpdates();
+  autoUpdater.on('update-available', () => {
+    mainWindow.webContents.send('update-available');
+  });
+
+  ipcMain.on('quit-and-install', () => {
+    autoUpdater.quitAndInstall();
+  });
 };
 
 // This method will be called when Electron has finished

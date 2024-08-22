@@ -26,6 +26,17 @@
  * ```
  */
 
+import { ipcRenderer } from 'electron';
 import './index.css';
 
 console.log('👋 This message is being logged by "renderer.ts", included via Vite');
+
+ipcRenderer.on('update-available', () => {
+    const updateEl = document.getElementById('update')
+    updateEl.style.display = 'block';
+    updateEl.addEventListener('click', () => {
+        updateEl.textContent = 'Installing...';
+        ipcRenderer.send('quit-and-install');
+    });
+});
+
