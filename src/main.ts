@@ -1,14 +1,5 @@
-import { app, autoUpdater, BrowserWindow, ipcMain } from 'electron';
+import { app, autoUpdater, BrowserWindow, ipcMain, net } from 'electron';
 import path from 'path';
-// import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
-
-// updateElectronApp({
-//   updateSource: {
-//     type: UpdateSourceType.StaticStorage,
-//     baseUrl: 'http://localhost:3000/make/zip'
-//   }
-// });
-
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -18,8 +9,8 @@ if (require('electron-squirrel-startup')) {
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1600,
+    height: 1200,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true
@@ -36,17 +27,78 @@ const createWindow = () => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
-  autoUpdater.setFeedURL({
-    url: 'http://localhost:3000'
-  });
-  autoUpdater.checkForUpdates();
-  autoUpdater.on('update-available', () => {
-    mainWindow.webContents.send('update-available');
+  const logToFrontent = (message: string) => {
+    mainWindow.webContents.send('message-from-main', message);
+  }
+
+  mainWindow.on('show', () => {
+    logToFrontent('Version: ' + app.getVersion());
   });
 
-  ipcMain.on('quit-and-install', () => {
-    autoUpdater.quitAndInstall();
+  ipcMain.on('message-to-main', (_event, message) => {
+    console.log(message);
+    
+    const server = 'http://localhost:3000'
+    const url = `${server}/${process.platform}/${process.arch}/releases.json`
+    // logToFrontent('URL: ' + url)
+    // const request = net.request(url);
+    // logToFrontent('Request: ' + request);
+    // request.on('response', (response) => {
+    //   logToFrontent(`STATUS: ${response.statusCode}`)
+    //   logToFrontent(`HEADERS: ${JSON.stringify(response.headers)}`)
+    //   response.on('data', (chunk) => {
+    //     logToFrontent(`BODY: ${chunk}`)
+    //   })
+    //   response.on('error', (error: any) => {
+    //     logToFrontent(`RESPONSE ERROR: ${error}`)
+    //   })
+    //   response.on('end', () => {
+    //     logToFrontent('No more data in response.')
+    //   })
+    // })
+    // request.on('finish', () => {
+    //   logToFrontent('Request finished')
+    // })
+
+    // request.on('abort', () => {
+    //   logToFrontent('Request aborted')
+    // })
+
+    // request.on('error', (error) => {
+    //   logToFrontent(`ERROR: ${error}`)
+    // });
+    
+    // request.end();
+    
+    autoUpdater.setFeedURL({ url, serverType: 'json' });
+
+    autoUpdater.checkForUpdates();
+    autoUpdater.on('update-available', (e:any, u:any) => {
+      logToFrontent('update-available:' + u);
+      for (const property in u) {
+        logToFrontent(`${property}: ${u[property]}`);
+      }
+    });
+
+    autoUpdater.on('update-downloaded', (event: Event,
+      releaseNotes: string,
+      releaseName: string,
+      releaseDate: Date,
+      updateURL: string) => {
+      logToFrontent('update-downloaded');
+      logToFrontent(releaseNotes);
+      logToFrontent(releaseName);
+      logToFrontent(releaseDate.toString());
+      logToFrontent(updateURL);
+    })
+  
+    ipcMain.on('quit-and-install', () => {
+      autoUpdater.quitAndInstall();
+    });
   });
+
+
+
 };
 
 // This method will be called when Electron has finished

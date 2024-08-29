@@ -26,17 +26,31 @@
  * ```
  */
 
-import { ipcRenderer } from 'electron';
+// import { ipcRenderer } from 'electron';
 import './index.css';
 
 console.log('👋 This message is being logged by "renderer.ts", included via Vite');
 
-ipcRenderer.on('update-available', () => {
-    const updateEl = document.getElementById('update')
-    updateEl.style.display = 'block';
-    updateEl.addEventListener('click', () => {
-        updateEl.textContent = 'Installing...';
-        ipcRenderer.send('quit-and-install');
-    });
+document.getElementById('test-button')?.addEventListener('click', () => {
+    window.electronAPI?.messageToMain('Hello from renderer process');
 });
 
+window.electronAPI?.messageFromMain((message: string) => {
+    const mfmEl = document.getElementById('message-from-main');
+    console.log('message-from-main', message);
+    if(mfmEl) {
+        mfmEl.innerHTML += message;
+    }
+});
+
+window.electronAPI?.updateAvailable((version: string) => {
+    const updateAvailableEl = document.getElementById('update-available');
+    if(updateAvailableEl) {
+        updateAvailableEl.style.display = 'block';
+    }
+    const versionEl = document.getElementById('version');
+    if(versionEl) {
+        versionEl.innerText = version;
+    }
+    console.log('Update available', version);
+});

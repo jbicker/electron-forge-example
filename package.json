@@ -1,7 +1,7 @@
 {
   "name": "electron-forge-example",
   "productName": "electron-forge-example",
-  "version": "1.0.7",
+  "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".vite/build/main.js",
   "scripts": {
@@ -39,6 +39,7 @@
   "license": "MIT",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
-    "update-electron-app": "^3.0.0"
+    "update-electron-app": "^3.0.0",
+    "express": "^4.19.2"
   }
 }

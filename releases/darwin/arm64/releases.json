@@ -1,0 +1,25 @@
+{
+    "currentRelease": "1.0.1",
+    "releases": [
+      {
+        "version": "1.0.0",
+        "updateTo": {
+          "version": "1.0.0",
+          "pub_date": "2024-08-28T12:29:53+01:00",
+          "notes": "Theses are some release notes innit",
+          "name": "1.0.0",
+          "url": "https://mycompany.example.com/myapp/releases/myrelease"
+        }
+      },
+      {
+        "version": "1.0.1",
+        "updateTo": {
+          "version": "1.0.1",
+          "pub_date": "2024-08-28T12:31:53+01:00",
+          "notes": "Theses are some release notes innit",
+          "name": "1.0.1",
+          "url": "http://localhost:3000/darwin/arm64/electron-forge-example-darwin-arm64-1.0.1.zip"
+        }
+      }
+    ]
+  }
