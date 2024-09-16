@@ -6,6 +6,7 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -31,7 +32,19 @@ const createWindow = () => {
     mainWindow.webContents.send('message-from-main', message);
   }
 
-  mainWindow.on('show', () => {
+  const old_console_error = console.error;
+  console.error = function (message: any) {
+      old_console_error(message);
+      logToFrontent(message)
+  }
+
+  const old_console_log = console.log;
+  console.log = function (message: any) {
+      old_console_log(message);
+      logToFrontent(message)
+  }
+
+  mainWindow.on('ready-to-show', () => {
     logToFrontent('Version: ' + app.getVersion());
   });
 
@@ -39,7 +52,8 @@ const createWindow = () => {
     console.log(message);
     
     const server = 'http://localhost:3000'
-    const url = `${server}/${process.platform}/${process.arch}/releases.json`
+    const url = `${server}/${process.platform}/${process.arch}`
+    logToFrontent('URL: ' + url)
     // logToFrontent('URL: ' + url)
     // const request = net.request(url);
     // logToFrontent('Request: ' + request);
@@ -70,14 +84,11 @@ const createWindow = () => {
     
     // request.end();
     
-    autoUpdater.setFeedURL({ url, serverType: 'json' });
+    autoUpdater.setFeedURL({ url });
 
     autoUpdater.checkForUpdates();
-    autoUpdater.on('update-available', (e:any, u:any) => {
-      logToFrontent('update-available:' + u);
-      for (const property in u) {
-        logToFrontent(`${property}: ${u[property]}`);
-      }
+    autoUpdater.on('update-available', () => {
+      logToFrontent('update-available:');
     });
 
     autoUpdater.on('update-downloaded', (event: Event,
@@ -90,6 +101,7 @@ const createWindow = () => {
       logToFrontent(releaseName);
       logToFrontent(releaseDate.toString());
       logToFrontent(updateURL);
+      autoUpdater.quitAndInstall();
     })
   
     ipcMain.on('quit-and-install', () => {
